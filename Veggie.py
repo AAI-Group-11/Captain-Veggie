@@ -58,8 +58,3 @@ class Veggie(FieldInhabitant):
         """
 
         self.__points = points
-
-
-v = Veggie("Garlic", "G", 20)
-
-print(v)
