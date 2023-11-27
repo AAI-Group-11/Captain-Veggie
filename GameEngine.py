@@ -21,14 +21,15 @@ class GameEngine:
         Constructor for GameEngine class
         """
         self.field = []
-        self.rabits = []
+        self.rabbits = []
         self.cap = None
         self.vegetables = []
+        self.__Snake = None
         self.score = 0
 
     def initVeggies(self):
         """
-        Create vegatable file with vegetable data.
+        Create vegetable file with vegetable data.
         """
         veg = input("Enter the name of the veggie file: ")
         while not os.path.exists(veg):
@@ -79,8 +80,21 @@ class GameEngine:
             while goon:
                 if self.field[rows][cols] is None:
                     rabbit = Rabbit(rows, cols)
-                    self.rabits.append(rabbit)
+                    self.rabbits.append(rabbit)
                     goon = False
+
+    def initSnake(self):
+        """
+        Initialize number of Snakes on the field
+        """  
+        goon = True
+        while goon:
+            rows = random.randint(0, len(self.field) - 1)
+            cols = random.randint(0, len(self.field[1]) - 1)
+            if self.field[rows][cols] is None:
+                self.Snake = Snake(rows, cols)
+                goon = False
+
 
     def initializeGame(self):
         """
@@ -89,6 +103,7 @@ class GameEngine:
         self.initVeggies()
         self.initCaptain()
         self.initRabbits()
+        self.initSnake()
 
     def remainingVeggies(self):
         """
@@ -204,7 +219,8 @@ Good luck!\n"""
 
             elif isinstance(self.field[captX][captY - 1], Veggie):
                 self.cap.setY(captY - 1)
-                print(f"Yummy! A delicious {self.field[captX][captY - 1].getName()}")
+                print(
+                    f"Yummy! A delicious {self.field[captX][captY - 1].getName()}")
                 self.cap.addVeggie(self.field[captX][captY - 1])
                 self.score += self.field[captX][captY - 1].getPoints()
                 self.field[captX][captY] = None
@@ -224,7 +240,8 @@ Good luck!\n"""
 
             elif isinstance(self.field[captX][captY + 1], Veggie):
                 self.cap.setY(captY + 1)
-                print(f"Yummy! A delicious {self.field[captX][captY + 1].getName()}")
+                print(
+                    f"Yummy! A delicious {self.field[captX][captY + 1].getName()}")
                 self.cap.addVeggie(self.field[captX][captY + 1])
                 self.score += self.field[captX][captY + 1].getPoints()
                 self.field[captX][captY] = None
@@ -254,7 +271,8 @@ Good luck!\n"""
 
             elif isinstance(self.field[captX - 1][captY], Veggie):
                 self.cap.setX(captX - 1)
-                print(f"Yummy! A delicious {self.field[captX - 1][captY].getName()}")
+                print(
+                    f"Yummy! A delicious {self.field[captX - 1][captY].getName()}")
                 self.cap.addVeggie(self.field[captX - 1][captY])
                 self.score += self.field[captX - 1][captY].getPoints()
                 self.field[captX][captY] = None
@@ -274,7 +292,8 @@ Good luck!\n"""
 
             elif isinstance(self.field[captX + 1][captY], Veggie):
                 self.cap.setX(captX + 1)
-                print(f"Yummy! A delicious {self.field[captX + 1][captY].getName()}")
+                print(
+                    f"Yummy! A delicious {self.field[captX + 1][captY].getName()}")
                 self.cap.addVeggie(self.field[captX + 1][captY])
                 self.score += self.field[captX + 1][captY].getPoints()
                 self.field[captX][captY] = None
