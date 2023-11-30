@@ -32,3 +32,12 @@ class Captain(Creature):
         :rtype: list
         """
         return self._veggies
+
+    def removeVeggies(self):
+        """
+        removes the last veggie captured by the captain
+
+        :return: last veggie captured
+        :rtype: object
+        """
+        return self._veggies.pop()
