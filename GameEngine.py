@@ -37,8 +37,8 @@ class GameEngine:
             veg = input("Enter the name of the veggie file: ")
 
         with open(veg, "r") as File:
-            dimesions = File.readline().strip().split(",")
-            rows, cols = int(dimesions[1]), int(dimesions[2])
+            dimensions = File.readline().strip().split(",")
+            rows, cols = int(dimensions[1]), int(dimensions[2])
             self.field = [[None for j in range(cols)] for i in range(rows)]
             for i in File:
                 info = i.strip().split(",")
@@ -73,7 +73,7 @@ class GameEngine:
         Initialize number of Rabbits on the field.
         """
 
-        for i in range(len(self.__NUMBEROFRABBITS)):
+        for i in range(self.__NUMBEROFRABBITS):
             rows = random.randint(0, len(self.field) - 1)
             cols = random.randint(0, len(self.field[1]) - 1)
             goon = True
@@ -86,7 +86,7 @@ class GameEngine:
     def initSnake(self):
         """
         Initialize number of Snakes on the field
-        """  
+        """
         goon = True
         while goon:
             rows = random.randint(0, len(self.field) - 1)
@@ -115,7 +115,7 @@ class GameEngine:
         count = 0
         for i in range(len(self.field)):
             for j in range(len(self.field[i])):
-                if isinstance(self.field[i], Veggie):
+                if isinstance(self.field[i][j], Veggie):
                     count += 1
 
         return count
@@ -124,14 +124,16 @@ class GameEngine:
         """
         This function introduce us to the game and its rules
         """
-        # TODO: add snake info in the intro
 
         print(
             """Welcome to Captain Veggie!
 The rabbits have invaded your garden and you must harvest
 as many vegetables as possible before the rabbits eat them
 all! Each vegetable is worth a different number of points
-so go for the high score!\n"""
+so go for the high score! Beware of a slithering snake in 
+the garden—it inches closer to you, and if it catches you,
+you'll lose five of the vegetables you've collected. 
+Let the vegetable-harvesting adventure begin!\n"""
         )
 
         print("The vegetables are: ")
@@ -173,7 +175,7 @@ Good luck!\n"""
         """
         This function defines the movement of rabbit in the field
         """
-        for rabbit in self.rabits:
+        for rabbit in self.rabbits:
             new_x = random.randint(rabbit.getX() - 1, rabbit.getX + 1)
             new_y = random.randint(rabbit.getY() - 1, rabbit.getY() + 1)
 
@@ -185,9 +187,9 @@ Good luck!\n"""
             ):
                 continue
 
-            # TODO: add snake condition
-            elif isinstance(self.field[new_x][new_y], Rabbit) or isinstance(
-                self.field[new_x][new_y], Captain
+            elif (isinstance(self.field[new_x][new_y], Rabbit)
+                  or isinstance(self.field[new_x][new_y], Captain)
+                  or isinstance(self.field[new_x][new_y], Snake)
             ):
                 continue
 
@@ -200,6 +202,64 @@ Good luck!\n"""
                 rabbit.setY(new_y)
 
                 self.field[old_x][old_y] = None
+
+    def moveSnake(self):
+        snake_x = self.__Snake.getX()
+        snake_y = self.__Snake.getY()
+
+        captain_x = self.cap.getX()
+        captain_y = self.cap.getY()
+
+        distance = 1000
+
+        moves = [[1, 0], [-1, 0], [0, -1], [0, 1]]
+        final_move = None
+
+        for move in moves:
+            snake_new_x = snake_x + move[0]
+            snake_new_y = snake_y + move[1]
+
+            if (
+                    snake_new_x < 0
+                    or snake_new_x >= len(self.field[0])
+                    or snake_new_y < 0
+                    or snake_new_y > len(self.field)
+            ):
+                continue
+
+            elif (
+                    isinstance(self.field[snake_new_x][snake_new_y], Rabbit)
+                    or isinstance(self.field[snake_new_x][snake_new_y], Veggie)
+            ):
+                continue
+
+            else:
+                temp = abs(captain_x - snake_new_x) + abs(captain_y - snake_new_y)
+                if temp <= distance:
+                    distance = temp
+                    final_move = [snake_new_x, snake_new_y]
+
+        snake_new_x = final_move[0]
+        snake_new_y = final_move[1]
+
+        if isinstance(self.field[snake_new_x][snake_new_y], Captain):
+            veggies_basket = len(self.cap.getVeggies)
+            if veggies_basket >= 5:
+                for i in range(5):
+                    remove = self.cap.removeVeggies()
+                    self.score -= remove.getPoints()
+                print("Oops! The snake caught you! You lost 5 vegetables.")
+            else:
+                for i in range(veggies_basket):
+                    remove = self.cap.removeVeggies()
+                    self.score -= remove.getPoints()
+                print("Oops! The snake caught you! You lost all vegetables.")
+
+            self.initSnake()
+
+        else:
+            self.field[snake_new_x][snake_new_y] = self.__Snake
+            self.field[snake_x][snake_y] = None
 
     def moveCptVertical(self, movement):
         """
