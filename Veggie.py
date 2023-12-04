@@ -37,7 +37,7 @@ class Veggie(FieldInhabitant):
         """
         set Name
 
-        :param name: Name of the vegtable
+        :param name: Name of the vegetable
         :type name: string
         """
 
