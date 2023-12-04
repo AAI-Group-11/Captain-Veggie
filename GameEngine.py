@@ -151,18 +151,19 @@ Good luck!\n"""
         """
         This function prints out the whole field
         """
-        out = "###" * (len(self.__field[0])) + "#" * 2 + "\n"
+        print("##" + "##" * (len(self.__field[0])) + "#")
 
+        out = ""
         for i in range(len(self.__field)):
             out += "# "
             for j in range(len(self.__field[i])):
-                out += self.__field[i][j].getSymbol() + " "
+                if self.__field[i][j] is not None:
+                    out += self.__field[i][j].getSymbol() + " "
+                else:
+                    out += " " + " "
 
-            out += " #\n"
-
-        out = "###" * (len(self.__field[0])) + "#" * 2
-
-        print(out)
+            out += "#\n"
+        print(out + "##" + "##" * (len(self.__field[0])) + "#")
 
     def getScore(self):
         """
@@ -176,37 +177,27 @@ Good luck!\n"""
         """
         This function defines the movement of rabbit in the field
         """
-        for rabbit in self.__rabbits:
-            new_x = random.randint(rabbit.getX() - 1, rabbit.getX + 1)
-            new_y = random.randint(rabbit.getY() - 1, rabbit.getY() + 1)
-
-            if (
-                new_x < 0
-                or new_x >= len(self.__field[0])
-                or new_y < 0
-                or new_y >= len(self.__field)
-            ):
-                continue
-
-            elif (isinstance(self.__field[new_x][new_y], Rabbit)
-                  or isinstance(self.__field[new_x][new_y], Captain)
-                  or isinstance(self.__field[new_x][new_y], Snake)
-                  ):
-                continue
-
-            else:
-                old_x = rabbit.getX()
-                old_y = rabbit.getY()
-
-                self.__field[new_x][new_y] = rabbit
-                rabbit.setX(new_x)
-                rabbit.setY(new_y)
-
-                self.__field[old_x][old_y] = None
+        for i in range(len(self.__rabbits)):
+            newX = random.randint(
+                self.__rabbits[i].getX() - 1, self.__rabbits[i].getX() + 1
+            )
+            newY = random.randint(
+                self.__rabbits[i].getY() - 1, self.__rabbits[i].getY() + 1
+            )
+            if 0 <= newX < len(self.__field[0]) and 0 <= newY < len(self.__field):
+                if (
+                        self.__field[newY][newX] is not None
+                        and isinstance(self.__field[newY][newX], Veggie)
+                ) or self.__field[newY][newX] is None:
+                    self.__field[newY][newX] = self.__rabbits[i]
+                    self.__field[self.__rabbits[i].getY()][self.__rabbits[i].getX()] = None
+                    self.__rabbits[i].setX(newX)
+                    self.__rabbits[i].setY(newY)
+            print("")
 
     def moveSnake(self):
-        snake_x = self.__Snake.getX()
-        snake_y = self.__Snake.getY()
+        snake_x = self.__snake.getX()
+        snake_y = self.__snake.getY()
 
         captain_x = self.__cap.getX()
         captain_y = self.__cap.getY()
@@ -224,19 +215,17 @@ Good luck!\n"""
                     snake_new_x < 0
                     or snake_new_x >= len(self.__field[0])
                     or snake_new_y < 0
-                    or snake_new_y > len(self.__field)
+                    or snake_new_y >= len(self.__field)
             ):
                 continue
 
-            elif (
-                    isinstance(self.__field[snake_new_x][snake_new_y], Rabbit)
-                    or isinstance(self.__field[snake_new_x][snake_new_y], Veggie)
+            elif isinstance(self.__field[snake_new_y][snake_new_x], Rabbit) or isinstance(
+                    self.__field[snake_new_y][snake_new_x], Veggie
             ):
                 continue
 
             else:
-                temp = abs(captain_x - snake_new_x) + \
-                    abs(captain_y - snake_new_y)
+                temp = abs(captain_x - snake_new_x) + abs(captain_y - snake_new_y)
                 if temp <= distance:
                     distance = temp
                     final_move = [snake_new_x, snake_new_y]
@@ -244,9 +233,9 @@ Good luck!\n"""
         snake_new_x = final_move[0]
         snake_new_y = final_move[1]
 
-        if isinstance(self.__field[snake_new_x][snake_new_y], Captain):
-            veggies_basket = len(self.__cap.getVeggies)
-            if veggies_basket >= 5:
+        if isinstance(self.__field[snake_new_y][snake_new_x], Captain):
+            veggies_basket = len(self.__cap.getVeggies())
+            if veggies_basket > 5:
                 for i in range(5):
                     remove = self.__cap.removeVeggies()
                     self.__score -= remove.getPoints()
@@ -257,11 +246,14 @@ Good luck!\n"""
                     self.__score -= remove.getPoints()
                 print("Oops! The snake caught you! You lost all vegetables.")
 
+            self.__field[snake_y][snake_x] = None
             self.initSnake()
 
         else:
-            self.__field[snake_new_x][snake_new_y] = self.__Snake
-            self.__field[snake_x][snake_y] = None
+            self.__field[snake_new_y][snake_new_x] = self.__snake
+            self.__snake.setX(snake_new_x)
+            self.__snake.setY(snake_new_y)
+            self.__field[snake_y][snake_x] = None
 
     def moveCptVertical(self, movement):
         """
