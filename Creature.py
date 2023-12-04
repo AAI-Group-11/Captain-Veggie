@@ -48,4 +48,4 @@ class Creature(FieldInhabitant):
         :param y: y coordinate of the creature
         :type y: int
         """
-        self._x = y
+        self._y = y

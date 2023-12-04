@@ -20,12 +20,12 @@ class GameEngine:
         """
         Constructor for GameEngine class
         """
-        self.field = []
-        self.rabbits = []
-        self.cap = None
-        self.vegetables = []
-        self.__Snake = None
-        self.score = 0
+        self.__field = []
+        self.__rabbits = []
+        self.__cap = None
+        self.__vegetables = []
+        self.__snake = None
+        self.__score = 0
 
     def initVeggies(self):
         """
@@ -39,19 +39,19 @@ class GameEngine:
         with open(veg, "r") as File:
             dimensions = File.readline().strip().split(",")
             rows, cols = int(dimensions[1]), int(dimensions[2])
-            self.field = [[None for j in range(cols)] for i in range(rows)]
+            self.__field = [[None for j in range(cols)] for i in range(rows)]
             for i in File:
                 info = i.strip().split(",")
                 v = Veggie(info[0], info[1], int(info[2]))
-                self.vegetables.append(v)
+                self.__vegetables.append(v)
 
             for _ in range(self.__NUMBEROFVEGGIES):
                 while True:
-                    rows = random.randint(0, rows - 1)
-                    cols = random.randint(0, cols - 1)
-                    if self.field[rows][cols] is None:
-                        randomVeggie = random.choice(self.vegetables)
-                        self.field[rows][cols] = randomVeggie
+                    row = random.randint(0, rows - 1)
+                    col = random.randint(0, cols - 1)
+                    if self.__field[row][col] is None:
+                        randomVeggie = random.choice(self.__vegetables)
+                        self.__field[row][col] = randomVeggie
                         break
 
     def initCaptain(self):
@@ -60,12 +60,12 @@ class GameEngine:
         """
         goon = True
         while goon:
-            rows = random.randint(0, len(self.field) - 1)
-            cols = random.randint(0, len(self.field[1]) - 1)
+            rows = random.randint(0, len(self.__field) - 1)
+            cols = random.randint(0, len(self.__field[1]) - 1)
 
-            if self.field[rows][cols] is None:
-                self.cap = Captain(rows, cols)
-                self.field[rows][cols] = self.cap
+            if self.__field[rows][cols] is None:
+                self.__cap = Captain(cols, rows)
+                self.__field[rows][cols] = self.__cap
                 goon = False
 
     def initRabbits(self):
@@ -74,13 +74,14 @@ class GameEngine:
         """
 
         for i in range(self.__NUMBEROFRABBITS):
-            rows = random.randint(0, len(self.field) - 1)
-            cols = random.randint(0, len(self.field[1]) - 1)
             goon = True
             while goon:
-                if self.field[rows][cols] is None:
-                    rabbit = Rabbit(rows, cols)
-                    self.rabbits.append(rabbit)
+                rows = random.randint(0, len(self.__field) - 1)
+                cols = random.randint(0, len(self.__field[1]) - 1)
+                if self.__field[rows][cols] is None:
+                    rabbit = Rabbit(cols, rows)
+                    self.__rabbits.append(rabbit)
+                    self.__field[rows][cols] = rabbit
                     goon = False
 
     def initSnake(self):
@@ -89,12 +90,12 @@ class GameEngine:
         """
         goon = True
         while goon:
-            rows = random.randint(0, len(self.field) - 1)
-            cols = random.randint(0, len(self.field[1]) - 1)
-            if self.field[rows][cols] is None:
-                self.Snake = Snake(rows, cols)
+            rows = random.randint(0, len(self.__field) - 1)
+            cols = random.randint(0, len(self.__field[1]) - 1)
+            if self.__field[rows][cols] is None:
+                self.__snake = Snake(cols, rows)
+                self.__field[rows][cols] = self.__snake
                 goon = False
-
 
     def initializeGame(self):
         """
@@ -113,9 +114,9 @@ class GameEngine:
         """
 
         count = 0
-        for i in range(len(self.field)):
-            for j in range(len(self.field[i])):
-                if isinstance(self.field[i][j], Veggie):
+        for i in range(len(self.__field)):
+            for j in range(len(self.__field[i])):
+                if isinstance(self.__field[i][j], Veggie):
                     count += 1
 
         return count
@@ -137,7 +138,7 @@ Let the vegetable-harvesting adventure begin!\n"""
         )
 
         print("The vegetables are: ")
-        for v in self.vegetables:
+        for v in self.__vegetables:
             print(v)
 
         print(
@@ -150,16 +151,16 @@ Good luck!\n"""
         """
         This function prints out the whole field
         """
-        out = "###" * (len(self.field[0])) + "#" * 2 + "\n"
+        out = "###" * (len(self.__field[0])) + "#" * 2 + "\n"
 
-        for i in range(len(self.field)):
+        for i in range(len(self.__field)):
             out += "# "
-            for j in range(len(self.field[i])):
-                out += self.field[i][j].getSymbol() + " "
+            for j in range(len(self.__field[i])):
+                out += self.__field[i][j].getSymbol() + " "
 
             out += " #\n"
 
-        out = "###" * (len(self.field[0])) + "#" * 2
+        out = "###" * (len(self.__field[0])) + "#" * 2
 
         print(out)
 
@@ -169,46 +170,46 @@ Good luck!\n"""
         :return: returns the current score
         :rtype: int
         """
-        return self.score
+        return self.__score
 
     def moveRabbits(self):
         """
         This function defines the movement of rabbit in the field
         """
-        for rabbit in self.rabbits:
+        for rabbit in self.__rabbits:
             new_x = random.randint(rabbit.getX() - 1, rabbit.getX + 1)
             new_y = random.randint(rabbit.getY() - 1, rabbit.getY() + 1)
 
             if (
                 new_x < 0
-                or new_x >= len(self.field[0])
+                or new_x >= len(self.__field[0])
                 or new_y < 0
-                or new_y >= len(self.field)
+                or new_y >= len(self.__field)
             ):
                 continue
 
-            elif (isinstance(self.field[new_x][new_y], Rabbit)
-                  or isinstance(self.field[new_x][new_y], Captain)
-                  or isinstance(self.field[new_x][new_y], Snake)
-            ):
+            elif (isinstance(self.__field[new_x][new_y], Rabbit)
+                  or isinstance(self.__field[new_x][new_y], Captain)
+                  or isinstance(self.__field[new_x][new_y], Snake)
+                  ):
                 continue
 
             else:
                 old_x = rabbit.getX()
                 old_y = rabbit.getY()
 
-                self.field[new_x][new_y] = rabbit
+                self.__field[new_x][new_y] = rabbit
                 rabbit.setX(new_x)
                 rabbit.setY(new_y)
 
-                self.field[old_x][old_y] = None
+                self.__field[old_x][old_y] = None
 
     def moveSnake(self):
         snake_x = self.__Snake.getX()
         snake_y = self.__Snake.getY()
 
-        captain_x = self.cap.getX()
-        captain_y = self.cap.getY()
+        captain_x = self.__cap.getX()
+        captain_y = self.__cap.getY()
 
         distance = 1000
 
@@ -221,20 +222,21 @@ Good luck!\n"""
 
             if (
                     snake_new_x < 0
-                    or snake_new_x >= len(self.field[0])
+                    or snake_new_x >= len(self.__field[0])
                     or snake_new_y < 0
-                    or snake_new_y > len(self.field)
+                    or snake_new_y > len(self.__field)
             ):
                 continue
 
             elif (
-                    isinstance(self.field[snake_new_x][snake_new_y], Rabbit)
-                    or isinstance(self.field[snake_new_x][snake_new_y], Veggie)
+                    isinstance(self.__field[snake_new_x][snake_new_y], Rabbit)
+                    or isinstance(self.__field[snake_new_x][snake_new_y], Veggie)
             ):
                 continue
 
             else:
-                temp = abs(captain_x - snake_new_x) + abs(captain_y - snake_new_y)
+                temp = abs(captain_x - snake_new_x) + \
+                    abs(captain_y - snake_new_y)
                 if temp <= distance:
                     distance = temp
                     final_move = [snake_new_x, snake_new_y]
@@ -242,24 +244,24 @@ Good luck!\n"""
         snake_new_x = final_move[0]
         snake_new_y = final_move[1]
 
-        if isinstance(self.field[snake_new_x][snake_new_y], Captain):
-            veggies_basket = len(self.cap.getVeggies)
+        if isinstance(self.__field[snake_new_x][snake_new_y], Captain):
+            veggies_basket = len(self.__cap.getVeggies)
             if veggies_basket >= 5:
                 for i in range(5):
-                    remove = self.cap.removeVeggies()
-                    self.score -= remove.getPoints()
+                    remove = self.__cap.removeVeggies()
+                    self.__score -= remove.getPoints()
                 print("Oops! The snake caught you! You lost 5 vegetables.")
             else:
                 for i in range(veggies_basket):
-                    remove = self.cap.removeVeggies()
-                    self.score -= remove.getPoints()
+                    remove = self.__cap.removeVeggies()
+                    self.__score -= remove.getPoints()
                 print("Oops! The snake caught you! You lost all vegetables.")
 
             self.initSnake()
 
         else:
-            self.field[snake_new_x][snake_new_y] = self.__Snake
-            self.field[snake_x][snake_y] = None
+            self.__field[snake_new_x][snake_new_y] = self.__Snake
+            self.__field[snake_x][snake_y] = None
 
     def moveCptVertical(self, movement):
         """
@@ -267,50 +269,50 @@ Good luck!\n"""
         :param movement: "w"/"W" or "s"/"S" representing up or down movement
         :type movement: str
         """
-        captX = self.cap.getX()
-        captY = self.cap.getY()
+        captX = self.__cap.getX()
+        captY = self.__cap.getY()
         movement = movement.lower()
 
         if movement == "w" and captY > 0:
-            if self.field[captX][captY - 1] == None:
-                self.cap.setY(captY - 1)
-                self.field[captX][captY] = None
-                self.field[self.cap.getX()][self.cap.getY()] = self.cap
+            if self.__field[captX][captY - 1] == None:
+                self.__cap.setY(captY - 1)
+                self.__field[captX][captY] = None
+                self.__field[self.__cap.getX()][self.__cap.getY()] = self.__cap
 
-            elif isinstance(self.field[captX][captY - 1], Veggie):
-                self.cap.setY(captY - 1)
+            elif isinstance(self.__field[captX][captY - 1], Veggie):
+                self.__cap.setY(captY - 1)
                 print(
-                    f"Yummy! A delicious {self.field[captX][captY - 1].getName()}")
-                self.cap.addVeggie(self.field[captX][captY - 1])
-                self.score += self.field[captX][captY - 1].getPoints()
-                self.field[captX][captY] = None
-                self.field[self.cap.getX()][self.cap.getY()] = self.cap
+                    f"Yummy! A delicious {self.__field[captX][captY - 1].getName()}")
+                self.__cap.addVeggie(self.__field[captX][captY - 1])
+                self.__score += self.__field[captX][captY - 1].getPoints()
+                self.__field[captX][captY] = None
+                self.__field[self.__cap.getX()][self.__cap.getY()] = self.__cap
 
-            elif isinstance(self.field[captX][captY - 1], Rabbit):
+            elif isinstance(self.__field[captX][captY - 1], Rabbit):
                 print("Don't step on the bunnies!")
 
-            elif isinstance(self.field[captX][captY - 1], Snake):
+            elif isinstance(self.__field[captX][captY - 1], Snake):
                 print("Don't step on the snake!")
 
-        elif movement == "s" and captY < len(self.field) - 1:
-            if self.field[captX][captY + 1] == None:
-                self.cap.setY(captY + 1)
-                self.field[captX][captY] = None
-                self.field[self.cap.getX()][self.cap.getY()] = self.cap
+        elif movement == "s" and captY < len(self.__field) - 1:
+            if self.__field[captX][captY + 1] == None:
+                self.__cap.setY(captY + 1)
+                self.__field[captX][captY] = None
+                self.__field[self.__cap.getX()][self.__cap.getY()] = self.__cap
 
-            elif isinstance(self.field[captX][captY + 1], Veggie):
-                self.cap.setY(captY + 1)
+            elif isinstance(self.__field[captX][captY + 1], Veggie):
+                self.__cap.setY(captY + 1)
                 print(
-                    f"Yummy! A delicious {self.field[captX][captY + 1].getName()}")
-                self.cap.addVeggie(self.field[captX][captY + 1])
-                self.score += self.field[captX][captY + 1].getPoints()
-                self.field[captX][captY] = None
-                self.field[self.cap.getX()][self.cap.getY()] = self.cap
+                    f"Yummy! A delicious {self.__field[captX][captY + 1].getName()}")
+                self.__cap.addVeggie(self.__field[captX][captY + 1])
+                self.__score += self.__field[captX][captY + 1].getPoints()
+                self.__field[captX][captY] = None
+                self.__field[self.__cap.getX()][self.__cap.getY()] = self.__cap
 
-            elif isinstance(self.field[captX][captY + 1], Rabbit):
+            elif isinstance(self.__field[captX][captY + 1], Rabbit):
                 print("Don't step on the bunnies!")
 
-            elif isinstance(self.field[captX][captY + 1], Snake):
+            elif isinstance(self.__field[captX][captY + 1], Snake):
                 print("Don't step on the snake!")
 
     def moveCptHorizontal(self, movement):
@@ -319,50 +321,50 @@ Good luck!\n"""
         :param movement: "a"/"A" or "d"/"D" representing left or right movement
         :type movement: str
         """
-        captX = self.cap.getX()
-        captY = self.cap.getY()
+        captX = self.__cap.getX()
+        captY = self.__cap.getY()
         movement = movement.lower()
 
         if movement == "a" and captX > 0:
-            if self.field[captX - 1][captY] == None:
-                self.cap.setX(captX - 1)
-                self.field[captX][captY] = None
-                self.field[self.cap.getX()][self.cap.getY()] = self.cap
+            if self.__field[captX - 1][captY] == None:
+                self.__cap.setX(captX - 1)
+                self.__field[captX][captY] = None
+                self.__field[self.__cap.getX()][self.__cap.getY()] = self.__cap
 
-            elif isinstance(self.field[captX - 1][captY], Veggie):
-                self.cap.setX(captX - 1)
+            elif isinstance(self.__field[captX - 1][captY], Veggie):
+                self.__cap.setX(captX - 1)
                 print(
-                    f"Yummy! A delicious {self.field[captX - 1][captY].getName()}")
-                self.cap.addVeggie(self.field[captX - 1][captY])
-                self.score += self.field[captX - 1][captY].getPoints()
-                self.field[captX][captY] = None
-                self.field[self.cap.getX()][self.cap.getY()] = self.cap
+                    f"Yummy! A delicious {self.__field[captX - 1][captY].getName()}")
+                self.__cap.addVeggie(self.__field[captX - 1][captY])
+                self.__score += self.__field[captX - 1][captY].getPoints()
+                self.__field[captX][captY] = None
+                self.__field[self.__cap.getX()][self.__cap.getY()] = self.__cap
 
-            elif isinstance(self.field[captX - 1][captY], Rabbit):
+            elif isinstance(self.__field[captX - 1][captY], Rabbit):
                 print("Don't step on the bunnies!")
 
-            elif isinstance(self.field[captX - 1][captY], Snake):
+            elif isinstance(self.__field[captX - 1][captY], Snake):
                 print("Don't step on the snake!")
 
-        elif movement == "d" and captX < len(self.field[0]) - 1:
-            if self.field[captX + 1][captY] == None:
-                self.cap.setX(captX + 1)
-                self.field[captX][captY] = None
-                self.field[self.cap.getX()][self.cap.getY()] = self.cap
+        elif movement == "d" and captX < len(self.__field[0]) - 1:
+            if self.__field[captX + 1][captY] == None:
+                self.__cap.setX(captX + 1)
+                self.__field[captX][captY] = None
+                self.__field[self.__cap.getX()][self.__cap.getY()] = self.__cap
 
-            elif isinstance(self.field[captX + 1][captY], Veggie):
-                self.cap.setX(captX + 1)
+            elif isinstance(self.__field[captX + 1][captY], Veggie):
+                self.__cap.setX(captX + 1)
                 print(
-                    f"Yummy! A delicious {self.field[captX + 1][captY].getName()}")
-                self.cap.addVeggie(self.field[captX + 1][captY])
-                self.score += self.field[captX + 1][captY].getPoints()
-                self.field[captX][captY] = None
-                self.field[self.cap.getX()][self.cap.getY()] = self.cap
+                    f"Yummy! A delicious {self.__field[captX + 1][captY].getName()}")
+                self.__cap.addVeggie(self.__field[captX + 1][captY])
+                self.__score += self.__field[captX + 1][captY].getPoints()
+                self.__field[captX][captY] = None
+                self.__field[self.__cap.getX()][self.__cap.getY()] = self.__cap
 
-            elif isinstance(self.field[captX + 1][captY], Rabbit):
+            elif isinstance(self.__field[captX + 1][captY], Rabbit):
                 print("Don't step on the bunnies!")
 
-            elif isinstance(self.field[captX + 1][captY], Snake):
+            elif isinstance(self.__field[captX + 1][captY], Snake):
                 print("Don't step on the snake!")
 
     def moveCaptain(self):
@@ -378,13 +380,13 @@ Good luck!\n"""
         if movement not in ["w", "a", "s", "d"]:
             print(f"{movement} is not a valid option")
 
-        if (movement == "w" and self.cap.getY() > 0) or (
-            movement == "s" and self.cap.getY() < len(self.field) - 1
+        if (movement == "w" and self.__cap.getY() > 0) or (
+            movement == "s" and self.__cap.getY() < len(self.__field) - 1
         ):
             self.moveCptVertical(movement)
 
-        elif (movement == "a" and self.cap.getX() > 0) or (
-            movement == "d" and self.cap.getX() < len(self.field[0]) - 1
+        elif (movement == "a" and self.__cap.getX() > 0) or (
+            movement == "d" and self.__cap.getX() < len(self.__field[0]) - 1
         ):
             self.moveCptHorizontal(movement)
 
@@ -398,10 +400,10 @@ Good luck!\n"""
         """
         print("GAME OVER!")
         print("You managed to harvest the following vegetables:")
-        for veggie in self.cap.getVeggies():
+        for veggie in self.__cap.getVeggies():
             print(veggie.getName())
 
-        print(f"Your score was: {self.score}")
+        print(f"Your score was: {self.__score}")
 
     def highScore(self):
         highScoreList = []
@@ -413,7 +415,7 @@ Good luck!\n"""
             "Please enter your three initials to go on the scoreboard: "
         )
         playerInitials = playerInitials[:3].upper()
-        newHighScore = (self.score, playerInitials)
+        newHighScore = (self.__score, playerInitials)
         highScoreList.append(newHighScore)
         highScoreList = sorted(highScoreList, reverse=True)
 
