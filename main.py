@@ -15,8 +15,7 @@ def main():
 
     captainMoveCounter = 0
     while remainingVeggies > 0:
-        print(f"Remaining Vegetables: {remainingVeggies}")
-        print(f"Player's Score: {game.getScore()}")
+        print(f"{remainingVeggies} veggies remaining. Current Score: {game.getScore()}")
 
         if captainMoveCounter == 0:
             game.printField()
