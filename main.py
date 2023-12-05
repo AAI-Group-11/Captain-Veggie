@@ -16,9 +16,6 @@ def main():
     game.intro()
     remainingVeggies = game.remainingVeggies()
 
-    # Initialize a counter to keep track of the captain's number of moves
-    captainMoveCounter = 0
-
     # Initialize an infinite while loop that runs until there are
     # no vegetables left in the field
     while remainingVeggies > 0:
@@ -26,18 +23,14 @@ def main():
         # their current score at the start of every round
         print(f"{remainingVeggies} veggies remaining. Current Score: {game.getScore()}")
 
-        # Prevent the rabbits from moving before the field is printed at the time of the game's initialization
-        if captainMoveCounter == 0:
-            game.printField()
+        # Print the field
+        game.printField()
 
-        # Let the rabbits move once the game has started and then print the field
-        elif captainMoveCounter > 0:
-            game.moveRabbits()
-            game.printField()
+        # Move the rabbits in the field
+        game.moveRabbits()
 
-        # Prompt the player to make the captain's move and increment the move counter
+        # Prompt the player to make the captain's move
         game.moveCaptain()
-        captainMoveCounter += 1
 
         # Move the snake
         game.moveSnake()
